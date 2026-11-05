@@ -5,21 +5,20 @@ public class PlayerMovement : MonoBehaviour
     public float JumpForce = 5f;
     public float MoveSpeed = 5f;
 
-    [SerializeField]
-    private Transform _groundCheck;
-    [SerializeField]
-    private LayerMask _groundLayer;
+    [SerializeField] private Transform _groundCheck;
+    [SerializeField]private LayerMask _groundLayer;
 
     private Rigidbody _rb;
+    private Animator _anim;
     private Vector3 _moveDirection;
-    private bool _isGround;
     private bool _isJumpRequested;
-    private int maxHealth = 3;
+    private int _maxHealth = 3;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         _rb = GetComponent<Rigidbody>();
+        _anim = GetComponent<Animator>();
 
         GameManager.Instance.OnGameStart += OnGameStart;
     }
@@ -68,22 +67,9 @@ public class PlayerMovement : MonoBehaviour
 
     void OnCollisionEnter(Collision collision)
     {
-        if (collision.transform.CompareTag("Ground"))
-        {
-            _isGround = true;
-        }
-
         if (collision.transform.CompareTag("DeathZone"))
         {
             GameManager.Instance.GameOver();
-        }
-    }
-
-    void OnCollisionExit(Collision collision)
-    {
-        if (collision.transform.CompareTag("Ground"))
-        {
-            _isGround = false;
         }
     }
 
@@ -98,6 +84,6 @@ public class PlayerMovement : MonoBehaviour
 
     public void OnGameStart(int maxHealth)
     {
-        this.maxHealth = maxHealth;
+        _maxHealth = maxHealth;
     }
 }
