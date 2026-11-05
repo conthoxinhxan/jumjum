@@ -12,9 +12,27 @@ public class TPSCameraController : MonoBehaviour
 
     private float _mouseX;
     private float _mouseY;
+    private CinemachineFollow _cameraFollow;
+    private Vector3 _followOffset;
 
     void Start()
     {
+        if (Player == null || CameraTarget == null)
+        {
+            Debug.LogError("TPSCameraController requires both Player and CameraTarget.", this);
+            enabled = false;
+            return;
+        }
+
+        _cameraFollow = CameraTarget.GetComponent<CinemachineFollow>();
+        if (_cameraFollow == null)
+        {
+            Debug.LogError("CameraTarget must have a CinemachineFollow component.", CameraTarget);
+            enabled = false;
+            return;
+        }
+
+        _followOffset = _cameraFollow.FollowOffset;
         _mouseX = Player.eulerAngles.y;
 
         Cursor.lockState = CursorLockMode.Locked;
@@ -30,9 +48,8 @@ public class TPSCameraController : MonoBehaviour
         _mouseY -= mouseY * MouseSensitivity;
 
         _mouseY = Mathf.Clamp(_mouseY, MinPitch, MaxPitch);
-
         UpdatePlayerRotation();
-        UpdateCameraRotation();
+        UpdateCameraPosition();
     }
 
     private void UpdatePlayerRotation()
@@ -44,12 +61,9 @@ public class TPSCameraController : MonoBehaviour
         );
     }
 
-    private void UpdateCameraRotation()
+    // update theo dõi vị trí của player
+    private void UpdateCameraPosition()
     {
-        CameraTarget.localRotation = Quaternion.Euler(
-            _mouseY,
-            0,
-            0
-        );
+        _cameraFollow.FollowOffset = Quaternion.Euler(_mouseY, 0f, 0f) * _followOffset;
     }
 }
