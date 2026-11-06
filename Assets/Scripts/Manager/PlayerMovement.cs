@@ -2,79 +2,120 @@ using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour
 {
-    public float JumpForce = 5f;
-    public float MoveSpeed = 5f;
+    [Header("Movement")]
+    [SerializeField] private float _moveSpeed = 5f;
 
+    [Header("Jump")]
+    [SerializeField] private float _jumpForce = 5f;
     [SerializeField] private Transform _groundCheck;
-    [SerializeField]private LayerMask _groundLayer;
+    [SerializeField] private float _groundRadius = 0.1f;
+    [SerializeField] private LayerMask _groundLayer;
+
+    [Header("Components")]
+    [SerializeField] private Animator _anim;
 
     private Rigidbody _rb;
-    private Animator _anim;
+
     private Vector3 _moveDirection;
+    private bool _isGrounded;
     private bool _isJumpRequested;
+
     private int _maxHealth = 3;
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    private static readonly int IsRunHash =
+        Animator.StringToHash("IsRun");
+
+    private void Awake()
     {
         _rb = GetComponent<Rigidbody>();
         _anim = GetComponent<Animator>();
+    }
 
+    private void OnEnable()
+    {
         GameManager.Instance.OnGameStart += OnGameStart;
     }
 
-    // Update is called once per frame
-    void Update()
+    private void OnDisable()
     {
-        float horizontal = Input.GetAxis("Horizontal");
-        float vertical = Input.GetAxis("Vertical");
+        GameManager.Instance.OnGameStart -= OnGameStart;
+    }
 
-        var direction = new Vector3(horizontal, 0, vertical).normalized;
-        _moveDirection = transform.TransformDirection(direction);
+    private void Update()
+    {
+        HandleInput();
+        UpdateAnimation();
+    }
 
-        // Kiểm tra nếu người chơi nhấn phím Space và đang đứng trên mặt đất, thì đặt _isJumpRequested thành true để yêu cầu nhảy.
-        if (Input.GetKeyDown(KeyCode.Space) && IsGround())
+    private void FixedUpdate()
+    {
+        CheckGround();
+        HandleMovement();
+        HandleJump();
+    }
+
+    private void HandleInput()
+    {
+        float horizontal = Input.GetAxisRaw("Horizontal");
+        float vertical = Input.GetAxisRaw("Vertical");
+
+        Vector3 inputDirection = new Vector3(horizontal, 0f, vertical).normalized;
+
+        _moveDirection = transform.TransformDirection(inputDirection);
+
+        if (Input.GetKeyDown(KeyCode.Space))
         {
             _isJumpRequested = true;
         }
     }
 
-    void FixedUpdate()
+    private void HandleMovement()
     {
-        // Cập nhật vận tốc của Rigidbody dựa trên hướng di chuyển và tốc độ di chuyển.
-        _rb.linearVelocity = new Vector3(
-            _moveDirection.x * MoveSpeed,
-            _rb.linearVelocity.y,
-            _moveDirection.z * MoveSpeed
-        );
-        _anim.SetBool("IsRun", _moveDirection != Vector3.zero);
+        Vector3 velocity = _rb.linearVelocity;
 
-        // Kiểm tra nếu người chơi đã yêu cầu nhảy và đang đứng trên mặt đất.
-        if (_isJumpRequested && IsGround())
+        velocity.x = _moveDirection.x * _moveSpeed;
+        velocity.z = _moveDirection.z * _moveSpeed;
+
+        _rb.linearVelocity = velocity;
+    }
+
+    private void HandleJump()
+    {
+        if (!_isJumpRequested)
+            return;
+
+        if (_isGrounded)
         {
-            _rb.linearVelocity = new Vector3(
-                _rb.linearVelocity.x,
-                JumpForce,
-                _rb.linearVelocity.z
-            );
-            _isJumpRequested = false;
+            Vector3 velocity = _rb.linearVelocity;
+            velocity.y = _jumpForce;
+
+            _rb.linearVelocity = velocity;
         }
+
+        _isJumpRequested = false;
     }
 
-    private bool IsGround()
+    private void CheckGround()
     {
-        return Physics.CheckSphere(_groundCheck.position, .1f, _groundLayer);
+        _isGrounded = Physics.CheckSphere(_groundCheck.position, _groundRadius, _groundLayer);
     }
 
-    void OnCollisionEnter(Collision collision)
+    private void UpdateAnimation()
     {
-        if (collision.transform.CompareTag("DeathZone"))
+        bool isMoving = _moveDirection.sqrMagnitude > 0.01f;
+
+        _anim.SetBool(IsRunHash, isMoving);
+    }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (collision.gameObject.CompareTag("DeathZone"))
         {
             GameManager.Instance.GameOver();
         }
     }
 
-    void OnTriggerEnter(Collider other)
+    private void OnTriggerEnter(Collider other)
     {
         if (other.CompareTag("Coin"))
         {
