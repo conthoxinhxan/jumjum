@@ -47,6 +47,7 @@ public class PlayerMovement : MonoBehaviour
             _rb.linearVelocity.y,
             _moveDirection.z * MoveSpeed
         );
+        _anim.SetBool("IsRun", _moveDirection != Vector3.zero);
 
         // Kiểm tra nếu người chơi đã yêu cầu nhảy và đang đứng trên mặt đất.
         if (_isJumpRequested && IsGround())

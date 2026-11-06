@@ -10,19 +10,29 @@ public class UIManager : MonoBehaviour
 
     public TMP_Text CoinText;
 
+    private GameManager _gameManager;
+
     private void OnEnable()
     {
-        GameManager.Instance.OnGameStart += HandleGameStart;
-        GameManager.Instance.OnGameOver += HandleGameOver;
-        GameManager.Instance.OnGameRestart += HandleGameRestart;
-        GameManager.Instance.OnGetCoin += OnGetCoin;
+        _gameManager = GameManager.Instance;
+        _gameManager.OnGameStart += HandleGameStart;
+        _gameManager.OnGameOver += HandleGameOver;
+        _gameManager.OnGameRestart += HandleGameRestart;
+        _gameManager.OnGetCoin += OnGetCoin;
     }
 
     private void OnDisable()
     {
-        GameManager.Instance.OnGameStart -= HandleGameStart;
-        GameManager.Instance.OnGameOver -= HandleGameOver;
-        GameManager.Instance.OnGameRestart -= HandleGameRestart;
+        if (_gameManager == null)
+        {
+            return;
+        }
+
+        _gameManager.OnGameStart -= HandleGameStart;
+        _gameManager.OnGameOver -= HandleGameOver;
+        _gameManager.OnGameRestart -= HandleGameRestart;
+        _gameManager.OnGetCoin -= OnGetCoin;
+        _gameManager = null;
     }
 
     private void HandleGameStart(int maxHealth)
