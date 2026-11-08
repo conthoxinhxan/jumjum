@@ -1,5 +1,6 @@
 using UnityEngine;
 
+[RequireComponent(typeof(PlayerInput))]
 public class PlayerMovement : MonoBehaviour
 {
     [Header("Movement")]
@@ -11,10 +12,9 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private float _groundRadius = 0.1f;
     [SerializeField] private LayerMask _groundLayer;
 
-    [Header("Components")]
-    [SerializeField] private Animator _anim;
-
+    private Animator _anim;
     private Rigidbody _rb;
+    private PlayerInput _playerInput;
 
     private Vector3 _moveDirection;
     private bool _isGrounded;
@@ -22,12 +22,12 @@ public class PlayerMovement : MonoBehaviour
 
     private int _maxHealth = 3;
 
-    private static readonly int IsRunHash =
-        Animator.StringToHash("IsRun");
+    private static readonly int IsRunHash = Animator.StringToHash("IsRun");
 
     private void Awake()
     {
         _rb = GetComponent<Rigidbody>();
+        _playerInput = GetComponent<PlayerInput>();
         _anim = GetComponent<Animator>();
     }
 
@@ -56,6 +56,20 @@ public class PlayerMovement : MonoBehaviour
 
     private void HandleInput()
     {
+        Vector2 input = _playerInput.MoveInput;
+        Vector3 inputDirection = new Vector3(input.x, 0f, input.y).normalized;
+
+        _moveDirection = transform.TransformDirection(inputDirection);
+
+        if (_playerInput.JumpPressedThisFrame)
+        {
+            _isJumpRequested = true;
+        }
+    }
+
+    /*
+    private void HandleInputLegacy()
+    {
         float horizontal = Input.GetAxisRaw("Horizontal");
         float vertical = Input.GetAxisRaw("Vertical");
 
@@ -68,6 +82,7 @@ public class PlayerMovement : MonoBehaviour
             _isJumpRequested = true;
         }
     }
+    */
 
     private void HandleMovement()
     {

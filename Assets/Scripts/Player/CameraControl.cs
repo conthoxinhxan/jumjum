@@ -15,6 +15,7 @@ public class CameraControl : MonoBehaviour
 
     private float _mouseX;
     private float _mouseY;
+    private PlayerInput _playerInput;
 
     private void Start()
     {
@@ -25,6 +26,12 @@ public class CameraControl : MonoBehaviour
 
         // Khởi tạo giá trị _mouseX bằng góc quay hiện tại của Target quanh trục Y.
         _mouseX = Target.eulerAngles.y;
+        _playerInput = Target.GetComponent<PlayerInput>();
+
+        if (_playerInput == null && Application.isPlaying)
+        {
+            Debug.LogError("CameraControl requires PlayerInput on its Target.", Target);
+        }
 
         // Cursor.lockState = CursorLockMode.Locked; khóa con trỏ chuột vào trung tâm màn hình, 
         // ngăn người dùng di chuyển nó ra khỏi cửa sổ trò chơi.
@@ -34,10 +41,21 @@ public class CameraControl : MonoBehaviour
 
     private void Update()
     {
+        if (Target == null || _playerInput == null)
+        {
+            return;
+        }
+
         // Cập nhật giá trị _mouseX và _mouseY dựa trên đầu vào chuột, 
         // với độ nhạy được xác định bởi MouseSensitivity.
+        Vector2 lookInput = _playerInput.LookInput;
+        _mouseX += lookInput.x * MouseSensitivity;
+        _mouseY -= lookInput.y * MouseSensitivity;
+
+        /*
         _mouseX += Input.GetAxis("Mouse X") * MouseSensitivity;
         _mouseY -= Input.GetAxis("Mouse Y") * MouseSensitivity;
+        */
 
         // Giới hạn giá trị _mouseY để tránh camera quay quá cao hoặc quá thấp.
         _mouseY = Mathf.Clamp(_mouseY, MinPitch, MaxPitch);
@@ -48,6 +66,11 @@ public class CameraControl : MonoBehaviour
 
     private void LateUpdate()
     {
+        if (Target == null)
+        {
+            return;
+        }
+
         Quaternion cameraRotation = Quaternion.Euler(_mouseY, _mouseX, 0f);
 
         // Xoay offset theo hướng nhìn rồi cộng vào vị trí Target.

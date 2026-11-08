@@ -11,8 +11,8 @@ GameObject:
   - component: {fileID: 7643089386045175468}
   - component: {fileID: 7114495174467983417}
   - component: {fileID: 6429285826218526328}
-  - component: {fileID: 1995015090211766331}
   - component: {fileID: 2269219018125648253}
+  - component: {fileID: -1347982382834682134}
   m_Layer: 0
   m_Name: Coin
   m_TagString: Coin
@@ -92,19 +92,6 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!114 &1995015090211766331
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7766742177080561025}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 90fd743b0f7470848ad558e4c5db6c84, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::RotateObject
-  RotateSpeed: 100
 --- !u!135 &2269219018125648253
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -126,3 +113,16 @@ SphereCollider:
   serializedVersion: 3
   m_Radius: 0.0009935951
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &-1347982382834682134
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7766742177080561025}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2e7fdf9f71f1c0f47902f2fde5954a83, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RotateObject
+  RotateSpeed: 100
