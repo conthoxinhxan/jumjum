@@ -41,7 +41,7 @@ public class CameraControl : MonoBehaviour
 
     private void Update()
     {
-        if (Target == null || _playerInput == null)
+        if (!Application.isPlaying || Target == null || _playerInput == null)
         {
             return;
         }

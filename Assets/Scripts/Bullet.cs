@@ -3,10 +3,16 @@ using UnityEngine;
 public class Bullet : MonoBehaviour
 {
     public float Speed = 8f;
+    public float LifeTime = 5f;
     
     private Rigidbody _rb;
 
     private Vector3 _direction;
+
+    private void Start()
+    {
+        Destroy(gameObject, LifeTime);
+    }
 
     // Update is called once per frame
     void Update()

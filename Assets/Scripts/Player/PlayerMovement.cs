@@ -15,6 +15,7 @@ public class PlayerMovement : MonoBehaviour
     private Animator _anim;
     private Rigidbody _rb;
     private PlayerInput _playerInput;
+    private GameManager _gameManager;
 
     private Vector3 _moveDirection;
     private bool _isGrounded;
@@ -33,12 +34,19 @@ public class PlayerMovement : MonoBehaviour
 
     private void OnEnable()
     {
-        GameManager.Instance.OnGameStart += OnGameStart;
+        _gameManager = GameManager.Instance;
+        _gameManager.OnGameStart += OnGameStart;
     }
 
     private void OnDisable()
     {
-        GameManager.Instance.OnGameStart -= OnGameStart;
+        if (_gameManager == null)
+        {
+            return;
+        }
+
+        _gameManager.OnGameStart -= OnGameStart;
+        _gameManager = null;
     }
 
     private void Update()
