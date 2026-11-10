@@ -58,7 +58,7 @@ public class PlayerMovement : MonoBehaviour
     private void FixedUpdate()
     {
         CheckGround();
-        HandleMovement();
+        // HandleMovement();
         HandleJump();
     }
 

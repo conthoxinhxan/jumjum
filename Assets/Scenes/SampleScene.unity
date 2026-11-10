@@ -662,7 +662,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 18331b75ca694fb4aae58911ce83d547, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TPSCameraController
-  Player: {fileID: 543450652989675201}
+  Player: {fileID: 0}
   CameraTarget: {fileID: 0}
   MouseSensitivity: 3
   MinPitch: -40
@@ -5129,6 +5129,7 @@ GameObject:
   - component: {fileID: 718942511}
   - component: {fileID: 5866666021193682108}
   - component: {fileID: 5866666021193682109}
+  - component: {fileID: 5866666021193682110}
   m_Layer: 7
   m_Name: MagicCharacter
   m_TagString: Player
@@ -6431,7 +6432,7 @@ Animator:
   m_Controller: {fileID: 9100000, guid: 0d2af7951534f4e438cc07dadf7360b3, type: 2}
   m_CullingMode: 1
   m_UpdateMode: 0
-  m_ApplyRootMotion: 0
+  m_ApplyRootMotion: 1
   m_LinearVelocityBlending: 0
   m_StabilizeFeet: 0
   m_AnimatePhysics: 0
@@ -6471,6 +6472,18 @@ MonoBehaviour:
   _groundLayer:
     serializedVersion: 2
     m_Bits: 64
+--- !u!114 &5866666021193682110
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 919132148799573115}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b9db67bdf88514043babb3d63b137856, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerAttack
 --- !u!4 &5901452234618717250
 Transform:
   m_ObjectHideFlags: 0
