@@ -22,6 +22,7 @@ public class PlayerMovement : MonoBehaviour
     private bool _isJumpRequested;
 
     private int _maxHealth = 3;
+    private Vector2 _moveInput;
 
     private static readonly int IsRunHash = Animator.StringToHash("IsRun");
 
@@ -64,10 +65,10 @@ public class PlayerMovement : MonoBehaviour
 
     private void HandleInput()
     {
-        Vector2 input = _playerInput.MoveInput;
-        Vector3 inputDirection = new Vector3(input.x, 0f, input.y).normalized;
+        _moveInput = _playerInput.MoveInput;
+        // Vector3 inputDirection = new Vector3(input.x, 0f, input.y).normalized;
 
-        _moveDirection = transform.TransformDirection(inputDirection);
+        // _moveDirection = transform.TransformDirection(inputDirection);
 
         if (_playerInput.JumpPressedThisFrame)
         {
@@ -125,9 +126,8 @@ public class PlayerMovement : MonoBehaviour
 
     private void UpdateAnimation()
     {
-        bool isMoving = _moveDirection.sqrMagnitude > 0.01f;
-
-        _anim.SetBool(IsRunHash, isMoving);
+        _anim.SetFloat("MoveX", _moveInput.x, 0.1f, Time.deltaTime);
+        _anim.SetFloat("MoveY", _moveInput.y, 0.1f, Time.deltaTime);
     }
 
     private void OnCollisionEnter(Collision collision)
