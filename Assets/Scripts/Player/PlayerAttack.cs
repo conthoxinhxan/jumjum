@@ -1,57 +1,113 @@
+
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-[RequireComponent(typeof(PlayerInput), typeof(Animator))]
 public class PlayerAttack : MonoBehaviour
 {
     private Animator _anim;
-    private PlayerInput _playerInput;
     private InputSystem_Actions _inputAction;
-
-    private void Awake()
+    private readonly int[] _attackStateHashes =
     {
-        _anim = GetComponent<Animator>();
-        _playerInput = GetComponent<PlayerInput>();
-    }
+        Animator.StringToHash("Attack1"),
+        Animator.StringToHash("Attack2"),
+        Animator.StringToHash("Attack3")
+    };
 
-    private void OnEnable()
-    {
-        if (_inputAction != null)
-        {
-            _inputAction.Player.Attack.performed += Attack;
-        }
-    }
+    private int _comboIndex = 0;
+    private bool _canCombo = false;
+    private bool _queuedAttack = false;
 
     private void Start()
     {
-        _inputAction = _playerInput.InputActions;
+        _anim = GetComponent<Animator>();
+        PlayerInput playerInput = GetComponent<PlayerInput>();
+        _inputAction = playerInput.InputActions;
+        _inputAction.Player.Attack.performed += Attack;
     }
 
     private void OnDisable()
     {
         if (_inputAction != null)
         {
-            _inputAction.Player.Attack.performed -= CastSkill1;
+            _inputAction.Player.Attack.performed -= Attack;
         }
     }
 
-    private void Attack(InputAction.CallbackContext callbackContext)
+    private void Update()
     {
-        _anim.SetBool("IsCombat", true);
-        _anim.SetTrigger("MeleeAttack");
-    }
-
-    private void CastSkill1(InputAction.CallbackContext callbackContext)
-    {
-        if (_inputAction.Player.RightClick.IsPressed())
+        if (_comboIndex == 0 || _anim.IsInTransition(0))
         {
-            _anim.SetBool("IsCombat", true);
-            _anim.SetTrigger("Skill1");
+            return;
+        }
+
+        AnimatorStateInfo state = _anim.GetCurrentAnimatorStateInfo(0);
+        int attackIndex = _comboIndex - 1;
+        if (attackIndex < _attackStateHashes.Length
+            && state.shortNameHash == _attackStateHashes[attackIndex]
+            && state.normalizedTime >= 1f)
+        {
+            if (_queuedAttack && _comboIndex < 3)
+            {
+                _canCombo = true;
+                NextAttack();
+            }
+            else
+            {
+                EndAttack(_comboIndex);
+            }
         }
     }
 
-    public void IsCombatFisished()
+    private void Attack(InputAction.CallbackContext context)
     {
+        // Chưa đánh: bắt đầu combo
+        if (_comboIndex == 0)
+        {
+            _comboIndex = 1;
+            _queuedAttack = false;
+            _canCombo = false;
+
+            _anim.SetBool("IsCombat", true);
+            _anim.SetTrigger("Attack1");
+            return;
+        }
+
+        // Đang thực hiện đòn 1 hoặc 2
+        if (_comboIndex < 3)
+        {
+            _queuedAttack = true;
+
+            if (_canCombo)
+            {
+                NextAttack();
+            }
+        }
+    }
+
+    private void NextAttack()
+    {
+        if (!_queuedAttack || !_canCombo || _comboIndex >= 3)
+        {
+            return;
+        }
+
+        _comboIndex++;
+
+        _queuedAttack = false;
+        _canCombo = false;
+
+        _anim.SetTrigger("Attack" + _comboIndex);
+    }
+
+    public void EndAttack(int attackIndex)
+    {
+        if (_comboIndex != attackIndex)
+            return;
+
+        _comboIndex = 0;
+        _queuedAttack = false;
+        _canCombo = false;
+
         _anim.SetBool("IsCombat", false);
     }
 }
