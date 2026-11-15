@@ -1,7 +1,7 @@
 using UnityEngine;
 
 [RequireComponent(typeof(PlayerInput))]
-public class PlayerMovement : MonoBehaviour
+public class PlayerMovement : MonoBehaviour, IDamageable
 {
     [Header("Movement")]
     [SerializeField] private float _moveSpeed = 5f;
@@ -15,13 +15,10 @@ public class PlayerMovement : MonoBehaviour
     private Animator _anim;
     private Rigidbody _rb;
     private PlayerInput _playerInput;
-    private GameManager _gameManager;
-
     private Vector3 _moveDirection;
     private bool _isGrounded;
     private bool _isJumpRequested;
 
-    private int _maxHealth = 3;
     private Vector2 _moveInput;
 
     private static readonly int IsRunHash = Animator.StringToHash("IsRun");
@@ -31,23 +28,6 @@ public class PlayerMovement : MonoBehaviour
         _rb = GetComponent<Rigidbody>();
         _playerInput = GetComponent<PlayerInput>();
         _anim = GetComponent<Animator>();
-    }
-
-    private void OnEnable()
-    {
-        _gameManager = GameManager.Instance;
-        _gameManager.OnGameStart += OnGameStart;
-    }
-
-    private void OnDisable()
-    {
-        if (_gameManager == null)
-        {
-            return;
-        }
-
-        _gameManager.OnGameStart -= OnGameStart;
-        _gameManager = null;
     }
 
     private void Update()
@@ -147,8 +127,8 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
-    public void OnGameStart(int maxHealth)
+    public void TakeDamage(int damage)
     {
-        _maxHealth = maxHealth;
+        GameManager.Instance.TakeDamage(damage);
     }
 }

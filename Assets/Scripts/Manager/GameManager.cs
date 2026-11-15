@@ -26,11 +26,13 @@ public class GameManager : MonoBehaviour
     public event Action<int> OnGameStart;
     public event Action OnGameOver;
     public event Action OnGameRestart;
+    public event Action<int> OnHealthChanged;
 
     public event Action<int> OnGetCoin;
 
     private static GameManager _instance;
     private int _totalCoints;
+    public int CurrentHealth { get; private set; }
 
 
     void Awake()
@@ -60,7 +62,21 @@ public class GameManager : MonoBehaviour
 
     public void StartGame()
     {
+        CurrentHealth = MaxHealth;
         OnGameStart?.Invoke(MaxHealth);
+        OnHealthChanged?.Invoke(CurrentHealth);
+    }
+
+    public void TakeDamage(int damage)
+    {
+        if (damage <= 0 || CurrentHealth <= 0)
+            return;
+
+        CurrentHealth = Mathf.Max(0, CurrentHealth - damage);
+        OnHealthChanged?.Invoke(CurrentHealth);
+
+        if (CurrentHealth == 0)
+            GameOver();
     }
 
     public void GetCoin()

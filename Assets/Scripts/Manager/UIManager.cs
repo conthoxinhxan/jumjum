@@ -19,6 +19,7 @@ public class UIManager : MonoBehaviour
         _gameManager.OnGameOver += HandleGameOver;
         _gameManager.OnGameRestart += HandleGameRestart;
         _gameManager.OnGetCoin += OnGetCoin;
+        _gameManager.OnHealthChanged += UpdateHealth;
     }
 
     private void OnDisable()
@@ -32,6 +33,7 @@ public class UIManager : MonoBehaviour
         _gameManager.OnGameOver -= HandleGameOver;
         _gameManager.OnGameRestart -= HandleGameRestart;
         _gameManager.OnGetCoin -= OnGetCoin;
+        _gameManager.OnHealthChanged -= UpdateHealth;
         _gameManager = null;
     }
 
@@ -62,5 +64,10 @@ public class UIManager : MonoBehaviour
     private void OnGetCoin(int totalCoins)
     {
         CoinText.text = "Coins: " + totalCoins.ToString();
+    }
+
+    private void UpdateHealth(int currentHealth)
+    {
+        HealthPanel.GetComponent<HealthPanel>().UpdateHealth(currentHealth);
     }
 }

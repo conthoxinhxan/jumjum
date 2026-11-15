@@ -1,98 +1,75 @@
-using System.Collections;
-using Unity.VisualScripting;
 using UnityEngine;
 
-public class AutoShotingRobot : MonoBehaviour
+public class AutoShotingRobot : EnemyBase
 {
-    public GameObject Head;
-    public Transform ShootPoint;
-    public float RotateSpeed = 90f; // 90 degrees per second
-    public float ShootInterval = 1f; // Shoot every 1 second
-    public float DetectionRange = 10f; // Range to detect the player
-
+    public Transform Head;
+    public float RotateSpeed = 90f;
+    public float ShootInterval = 1f;
     public Bullet BulletPrefab;
 
-    public LayerMask PlayerLayer;
+    private float _nextShotTime;
 
-    private IEnumerator _shootingCoroutine;
-    private IEnumerator _rotationCoroutine;
-
-
-    void Update()
+    private void Update()
     {
-        CheckPlayerInSight();
-    }
+        UpdateTarget();
+        if (Target == null)
+            return;
 
-    public void CheckPlayerInSight()
-    {
-        Collider[] hits = Physics.OverlapSphere(ShootPoint.position, 10f, PlayerLayer);
-        if (hits.Length > 0)
-        {
-            foreach (var hit in hits)
-            {
-                if (hit.CompareTag("Player"))
-                {
-                    if (_shootingCoroutine == null)
-                    {
-                        _shootingCoroutine = ShootAtInterval();
-                        StartCoroutine(_shootingCoroutine);
-                    }
+        RotateHeadTowardTarget();
 
-                    if (_rotationCoroutine == null)
-                    {
-                        _rotationCoroutine = RotateHeadTowardTarget(hit.transform);
-                        StartCoroutine(_rotationCoroutine);
-                    }
-                    break;
-                }
-            }
-        }
-        else 
+        if (Time.time >= _nextShotTime && HasLineOfSight())
         {
-            StopAllCoroutines();
-            _shootingCoroutine = null;
-            _rotationCoroutine = null;
+            Fire();
+            _nextShotTime = Time.time + ShootInterval;
         }
     }
 
-    public void Shoot()
+    private void RotateHeadTowardTarget()
     {
+        Transform head = Head != null ? Head : transform;
+        Vector3 direction = Target.position - head.position;
+        if (direction.sqrMagnitude < 0.0001f)
+            return;
+
+        Quaternion targetRotation = Quaternion.LookRotation(direction);
+        head.rotation = Quaternion.RotateTowards(
+            head.rotation,
+            targetRotation,
+            RotateSpeed * Time.deltaTime);
+    }
+
+    private bool HasLineOfSight()
+    {
+        if (ShootPoint == null)
+            return false;
+
+        Vector3 direction = Target.position - ShootPoint.position;
+        float distance = direction.magnitude;
+        if (distance > AttackRange || distance <= Mathf.Epsilon)
+            return false;
+
+        if (!Physics.Raycast(
+                ShootPoint.position,
+                direction / distance,
+                out RaycastHit hit,
+                distance,
+                ScanLayer))
+        {
+            return false;
+        }
+
+        return FindPlayerRoot(hit.transform) == Target;
+    }
+
+    public override void Fire()
+    {
+        if (BulletPrefab == null || ShootPoint == null)
+        {
+            Debug.LogError("AutoShotingRobot needs a BulletPrefab and ShootPoint.", this);
+            return;
+        }
+
         Bullet bullet = Instantiate(BulletPrefab, ShootPoint.position, ShootPoint.rotation);
         bullet.Fire(ShootPoint.forward);
-    }
-
-    public IEnumerator ShootAtInterval()
-    {
-        while (true)
-        {
-            RaycastHit[] hits = Physics.RaycastAll(ShootPoint.position, ShootPoint.forward, DetectionRange, PlayerLayer);
-            foreach (var hit in hits)
-            {
-                if (hit.collider.CompareTag("Player"))
-                {
-                    Shoot();
-                    break;
-                }
-            }
-            yield return new WaitForSeconds(ShootInterval);
-        }
-    }
-
-    public IEnumerator RotateHeadTowardTarget(Transform target)
-    {
-        while (true)
-        {
-            Vector3 direction = (target.position - Head.transform.position).normalized;
-            Quaternion lookRotation = Quaternion.LookRotation(direction);
-            Head.transform.rotation = Quaternion.RotateTowards(Head.transform.rotation, lookRotation, RotateSpeed * Time.deltaTime);
-
-            yield return null;
-        }
-    }
-
-    void OnDrawGizmos()
-    {
-        Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(ShootPoint.position, DetectionRange);
     }
 }
