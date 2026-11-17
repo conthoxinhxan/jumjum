@@ -16,6 +16,7 @@ public abstract class EnemyBase : MonoBehaviour
     public LayerMask ScanLayer;
 
     private Rigidbody _rb;
+    private bool _isAttack = false;
 
     protected Transform Target { get; private set; }
 

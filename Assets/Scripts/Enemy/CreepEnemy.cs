@@ -9,10 +9,12 @@ public class CreepEnemy : EnemyBase, IDamageable
     public float RotateSpeed = 180f;
     public UnityEvent OnMeleeAttack;
     private float _nextAttackTime;
+    private Animator _anim;
 
     public override void Awake()
     {
         base.Awake();
+        _anim = GetComponent<Animator>();
         AttackRange = Mathf.Max(AttackRange, 0f);
     }
 
@@ -45,31 +47,12 @@ public class CreepEnemy : EnemyBase, IDamageable
 
     public override void Fire()
     {
-        // if (Target == null || !IsTargetInAttackRange())
-        //     return;
 
-        // MonoBehaviour[] components = Target.GetComponents<MonoBehaviour>();
-        // bool damagedTarget = false;
-        // foreach (MonoBehaviour component in components)
-        // {
-        //     if (component is IDamageable damageable)
-        //     {
-        //         damageable.TakeDamage(MeleeDamage);
-        //         damagedTarget = true;
-        //         break;
-        //     }
-        // }
-
-        // if (!damagedTarget)
-        // {
-        //     Debug.LogWarning($"Target '{Target.name}' has no IDamageable component.", Target);
-        // }
-
-        // OnMeleeAttack?.Invoke();
     }
 
     public void TakeDamage(float damage)
     {
         Debug.Log("Enemy is taken damage");
+        _anim.SetTrigger("Hit");
     }
 }

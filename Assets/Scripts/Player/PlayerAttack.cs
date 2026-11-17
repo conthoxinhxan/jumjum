@@ -136,7 +136,7 @@ public class PlayerAttack : MonoBehaviour
              IDamageable target = hit.GetComponentInParent<IDamageable>();
 
             if (target != null && damagedTargets.Add(target))
-            target.TakeDamage(_attackDamage);
+                target.TakeDamage(_attackDamage);
         }
     }
 }
