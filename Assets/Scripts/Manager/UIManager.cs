@@ -66,7 +66,7 @@ public class UIManager : MonoBehaviour
         CoinText.text = "Coins: " + totalCoins.ToString();
     }
 
-    private void UpdateHealth(int currentHealth)
+    private void UpdateHealth(float currentHealth)
     {
         HealthPanel.GetComponent<HealthPanel>().UpdateHealth(currentHealth);
     }

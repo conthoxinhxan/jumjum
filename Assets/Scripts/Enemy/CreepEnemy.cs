@@ -2,7 +2,7 @@ using UnityEngine;
 using UnityEngine.Events;
 
 [RequireComponent(typeof(Rigidbody))]
-public class CreepEnemy : EnemyBase
+public class CreepEnemy : EnemyBase, IDamageable
 {
     public int MeleeDamage = 1;
     public float AttackCooldown = 1f;
@@ -66,5 +66,10 @@ public class CreepEnemy : EnemyBase
         // }
 
         // OnMeleeAttack?.Invoke();
+    }
+
+    public void TakeDamage(float damage)
+    {
+        Debug.Log("Enemy is taken damage");
     }
 }

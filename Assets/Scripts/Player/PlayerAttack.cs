@@ -1,9 +1,22 @@
 
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
 public class PlayerAttack : MonoBehaviour
 {
+    [SerializeField]
+    private Transform _attackPoint;
+
+    [SerializeField]
+    private float _attackRadius;
+
+    [SerializeField]
+    private float _attackDamage;
+
+    [SerializeField]
+    private LayerMask _enemyLayer;
+
     private Animator _anim;
     private InputSystem_Actions _inputAction;
     private readonly int[] _attackStateHashes =
@@ -109,5 +122,21 @@ public class PlayerAttack : MonoBehaviour
         _canCombo = false;
 
         _anim.SetBool("IsCombat", false);
+    }
+
+    public void DealDamage()
+    {
+        Debug.Log("Deal damage");
+        var hits = Physics.OverlapSphere(_attackPoint.position, _attackRadius, _enemyLayer);
+
+        var damagedTargets = new HashSet<IDamageable>();
+
+        foreach (var hit in hits)
+        {
+             IDamageable target = hit.GetComponentInParent<IDamageable>();
+
+            if (target != null && damagedTargets.Add(target))
+            target.TakeDamage(_attackDamage);
+        }
     }
 }

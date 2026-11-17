@@ -3,7 +3,7 @@ using UnityEngine;
 
 public interface IDamageable
 {
-    void TakeDamage(int damage);
+    void TakeDamage(float damage);
 }
 
 public abstract class EnemyBase : MonoBehaviour
@@ -21,7 +21,7 @@ public abstract class EnemyBase : MonoBehaviour
 
     public virtual void Awake()
     {
-        _rb.GetComponent<Rigidbody>();    
+        _rb = GetComponent<Rigidbody>();    
     }
 
     protected void UpdateTarget()
@@ -60,7 +60,6 @@ public abstract class EnemyBase : MonoBehaviour
         {
             return false;
         }
-        Debug.Log("Move bro");
         Vector3 direction = Target.position - transform.position;
         direction.y = 0f;
         float distance = direction.magnitude;

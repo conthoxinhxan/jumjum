@@ -25,7 +25,7 @@ public class HealthPanel : MonoBehaviour
         }
     }
 
-    public void UpdateHealth(int currentHealth)
+    public void UpdateHealth(float currentHealth)
     {
         for (int i = 0; i < _hearts.Length; i++)
         {

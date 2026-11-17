@@ -127,7 +127,7 @@ public class PlayerMovement : MonoBehaviour, IDamageable
         }
     }
 
-    public void TakeDamage(int damage)
+    public void TakeDamage(float damage)
     {
         GameManager.Instance.TakeDamage(damage);
     }
