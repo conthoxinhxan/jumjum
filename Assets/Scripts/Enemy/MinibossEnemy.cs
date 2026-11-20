@@ -58,7 +58,7 @@ public class MinibossEnemy : EnemyBase
         RotateTowardTarget(RotateSpeed);
     }
 
-    public override void Fire()
+    public void Fire()
     {
         // UseSkillOne();
     }

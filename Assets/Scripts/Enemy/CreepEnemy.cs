@@ -4,6 +4,8 @@ using UnityEngine.Events;
 [RequireComponent(typeof(Rigidbody))]
 public class CreepEnemy : EnemyBase, IDamageable
 {
+    private static readonly int AttackTriggerHash = Animator.StringToHash("Attack");
+
     public int MeleeDamage = 1;
     public float AttackCooldown = 1f;
     public float RotateSpeed = 180f;
@@ -42,12 +44,22 @@ public class CreepEnemy : EnemyBase, IDamageable
     {
         Vector3 offset = Target.position - transform.position;
         offset.y = 0f;
-        return offset.sqrMagnitude <= AttackRange * AttackRange;
+        return offset.sqrMagnitude <= AttackRange;
     }
 
-    public override void Fire()
+    public void Fire()
     {
+        if (Target == null || !IsTargetInAttackRange())
+        {
+            return;
+        }
+            
+        _anim.SetTrigger(AttackTriggerHash);
+        OnMeleeAttack?.Invoke();
 
+        IDamageable target = Target.GetComponent<IDamageable>();
+        target.TakeDamage(MeleeDamage);
+        Debug.LogWarning($"Target '{Target.name}' has no IDamageable component.", Target);
     }
 
     public void TakeDamage(float damage)

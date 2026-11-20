@@ -61,7 +61,7 @@ public class AutoShotingRobot : EnemyBase
         return FindPlayerRoot(hit.transform) == Target;
     }
 
-    public override void Fire()
+    public void Fire()
     {
         if (BulletPrefab == null || ShootPoint == null)
         {

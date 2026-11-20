@@ -1,9 +1,13 @@
-using System.Runtime.CompilerServices;
 using UnityEngine;
 
 public interface IDamageable
 {
     void TakeDamage(float damage);
+}
+
+public interface IDealDamageable
+{
+    void Fire();
 }
 
 public abstract class EnemyBase : MonoBehaviour
@@ -108,6 +112,4 @@ public abstract class EnemyBase : MonoBehaviour
         Gizmos.color = Color.red;
         Gizmos.DrawWireSphere(transform.position, ScanRange);
     }
-
-    public abstract void Fire();
 }
