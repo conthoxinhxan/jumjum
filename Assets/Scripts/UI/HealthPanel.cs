@@ -1,35 +1,21 @@
+using UnityEngine.UI;
 using UnityEngine;
 
 public class HealthPanel : MonoBehaviour
 {
-    public int MaxHealth = 3;
-    public GameObject HeartPrefab;
-    public Transform HeartContainer;
+    public Slider HealthSlider;
 
-    private GameObject[] _hearts;
-
-    public void Initialize(int maxHealth)
+    public void Initialize(PlayerHealth player)
     {
-        if (_hearts != null)
-        {
-            foreach(var heart in _hearts)
-            {
-                Destroy(heart);
-            }
-        }
+        HealthSlider.minValue = 0f;
+        HealthSlider.maxValue = Mathf.Max(1, player.MaxHealth);
+        HealthSlider.value = HealthSlider.maxValue;
 
-        _hearts = new GameObject[maxHealth];
-        for (int i = 0; i < maxHealth; i++)
-        {
-            _hearts[i] = Instantiate(HeartPrefab, HeartContainer);
-        }
+        player.HealthChanged += UpdateHealth;
     }
 
     public void UpdateHealth(float currentHealth)
     {
-        for (int i = 0; i < _hearts.Length; i++)
-        {
-            _hearts[i].SetActive(i < currentHealth);
-        }
+        HealthSlider.value = Mathf.Clamp(currentHealth, HealthSlider.minValue, HealthSlider.maxValue);
     }
 }

@@ -16,27 +16,37 @@ public class CameraControl : MonoBehaviour
     private float _mouseX;
     private float _mouseY;
     private PlayerInput _playerInput;
+    private GameManager _gameManager;
 
     private void Start()
     {
-        if (Target == null)
-        {
+        if (!Application.isPlaying)
             return;
-        }
 
-        // Khởi tạo giá trị _mouseX bằng góc quay hiện tại của Target quanh trục Y.
-        _mouseX = Target.eulerAngles.y;
-        _playerInput = Target.GetComponent<PlayerInput>();
+        _gameManager = GameManager.Instance;
+        _gameManager.OnPlayerChanged += HandlePlayerChanged;
+    }
 
-        if (_playerInput == null && Application.isPlaying)
+    private void OnDestroy()
+    {
+        if (_gameManager != null)
         {
-            Debug.LogError("CameraControl requires PlayerInput on its Target.", Target);
+            _gameManager.OnPlayerChanged -= HandlePlayerChanged;
         }
+           
+    }
 
-        // Cursor.lockState = CursorLockMode.Locked; khóa con trỏ chuột vào trung tâm màn hình, 
-        // ngăn người dùng di chuyển nó ra khỏi cửa sổ trò chơi.
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
+    private void HandlePlayerChanged(PlayerController player)
+    {
+        SetTarget(player != null ? player.transform : null);
+    }
+
+    private void SetTarget(Transform target)
+    {
+        Target = target;
+        _playerInput = target != null ? target.GetComponent<PlayerInput>() : null;
+        _mouseX = target != null ? target.eulerAngles.y : 0f;
+        _mouseY = 0f;
     }
 
     private void Update()
@@ -46,16 +56,9 @@ public class CameraControl : MonoBehaviour
             return;
         }
 
-        // Cập nhật giá trị _mouseX và _mouseY dựa trên đầu vào chuột, 
-        // với độ nhạy được xác định bởi MouseSensitivity.
         Vector2 lookInput = _playerInput.LookInput;
         _mouseX += lookInput.x * MouseSensitivity;
         _mouseY -= lookInput.y * MouseSensitivity;
-
-        /*
-        _mouseX += Input.GetAxis("Mouse X") * MouseSensitivity;
-        _mouseY -= Input.GetAxis("Mouse Y") * MouseSensitivity;
-        */
 
         // Giới hạn giá trị _mouseY để tránh camera quay quá cao hoặc quá thấp.
         _mouseY = Mathf.Clamp(_mouseY, MinPitch, MaxPitch);

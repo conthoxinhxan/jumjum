@@ -1,7 +1,8 @@
+using System;
 using UnityEngine;
 
 [RequireComponent(typeof(PlayerInput))]
-public class PlayerMovement : MonoBehaviour, IDamageable
+public class PlayerMovement : MonoBehaviour
 {
     [Header("Movement")]
     [SerializeField] private float _moveSpeed = 5f;
@@ -15,13 +16,13 @@ public class PlayerMovement : MonoBehaviour, IDamageable
     private Animator _anim;
     private Rigidbody _rb;
     private PlayerInput _playerInput;
-    private Vector3 _moveDirection;
     private bool _isGrounded;
     private bool _isJumpRequested;
 
     private Vector2 _moveInput;
 
-    private static readonly int IsRunHash = Animator.StringToHash("IsRun");
+    public event Action Jumped;
+    public event Action<bool> GroundedChanged;
 
     private void Awake()
     {
@@ -30,63 +31,38 @@ public class PlayerMovement : MonoBehaviour, IDamageable
         _anim = GetComponent<Animator>();
     }
 
+    private void OnEnable()
+    {
+        _playerInput.JumpPressed += RequestJump;
+    }
+
+    private void OnDisable()
+    {
+        _playerInput.JumpPressed -= RequestJump;
+        _isJumpRequested = false;
+    }
+
     private void Update()
     {
-        HandleInput();
+        _moveInput = _playerInput.MoveInput;
         UpdateAnimation();
     }
 
     private void FixedUpdate()
     {
         CheckGround();
-        // HandleMovement();
         HandleJump();
     }
 
-    private void HandleInput()
-    {
-        _moveInput = _playerInput.MoveInput;
-        // Vector3 inputDirection = new Vector3(input.x, 0f, input.y).normalized;
-
-        // _moveDirection = transform.TransformDirection(inputDirection);
-
-        if (_playerInput.JumpPressedThisFrame)
-        {
-            _isJumpRequested = true;
-        }
-    }
-
-    /*
-    private void HandleInputLegacy()
-    {
-        float horizontal = Input.GetAxisRaw("Horizontal");
-        float vertical = Input.GetAxisRaw("Vertical");
-
-        Vector3 inputDirection = new Vector3(horizontal, 0f, vertical).normalized;
-
-        _moveDirection = transform.TransformDirection(inputDirection);
-
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-            _isJumpRequested = true;
-        }
-    }
-    */
-
-    private void HandleMovement()
-    {
-        Vector3 velocity = _rb.linearVelocity;
-
-        velocity.x = _moveDirection.x * _moveSpeed;
-        velocity.z = _moveDirection.z * _moveSpeed;
-
-        _rb.linearVelocity = velocity;
-    }
+    private void RequestJump() => _isJumpRequested = true;
 
     private void HandleJump()
     {
-        if (!_isJumpRequested)
+        if (!_isJumpRequested || !_playerInput.isActiveAndEnabled)
+        {
             return;
+        }
+
 
         if (_isGrounded)
         {
@@ -94,6 +70,7 @@ public class PlayerMovement : MonoBehaviour, IDamageable
             velocity.y = _jumpForce;
 
             _rb.linearVelocity = velocity;
+            Jumped?.Invoke();
         }
 
         _isJumpRequested = false;
@@ -114,21 +91,12 @@ public class PlayerMovement : MonoBehaviour, IDamageable
     {
         if (collision.gameObject.CompareTag("DeathZone"))
         {
-            GameManager.Instance.GameOver();
+            GameManager.Instance?.GameOver();
         }
     }
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag("Coin"))
-        {
-            GameManager.Instance.GetCoin();
-            Destroy(other.gameObject);
-        }
     }
 
-    public void TakeDamage(float damage)
-    {
-        GameManager.Instance.TakeDamage(damage);
-    }
 }

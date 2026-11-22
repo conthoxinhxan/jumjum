@@ -6,10 +6,12 @@ public class Chest : MonoBehaviour
     private bool _isOpened = false;
 
     private Animator _chestAnimator;
+    private WorldSpaceUI _chestUI;
 
     private void Start()
     {
         _chestAnimator = GetComponent<Animator>();
+        _chestUI = GetComponentInChildren<WorldSpaceUI>();
     }
 
     void Update()

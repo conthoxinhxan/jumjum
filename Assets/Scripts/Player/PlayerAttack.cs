@@ -1,8 +1,9 @@
 
+using System;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.InputSystem;
 
+[RequireComponent(typeof(PlayerInput), typeof(Animator))]
 public class PlayerAttack : MonoBehaviour
 {
     [SerializeField]
@@ -18,7 +19,11 @@ public class PlayerAttack : MonoBehaviour
     private LayerMask _enemyLayer;
 
     private Animator _anim;
-    private InputSystem_Actions _inputAction;
+    private PlayerInput _playerInput;
+
+    public event Action<int> AttackStarted;
+    public event Action<int> AttackEnded;
+    public event Action<IDamageable> TargetHit;
     private readonly int[] _attackStateHashes =
     {
         Animator.StringToHash("Attack1"),
@@ -30,19 +35,26 @@ public class PlayerAttack : MonoBehaviour
     private bool _canCombo = false;
     private bool _queuedAttack = false;
 
-    private void Start()
+    private void Awake()
     {
         _anim = GetComponent<Animator>();
-        PlayerInput playerInput = GetComponent<PlayerInput>();
-        _inputAction = playerInput.InputActions;
-        _inputAction.Player.Attack.performed += Attack;
+        _playerInput = GetComponent<PlayerInput>();
+    }
+
+    private void OnEnable()
+    {
+        _playerInput.AttackPressed += Attack;
     }
 
     private void OnDisable()
     {
-        if (_inputAction != null)
+        _playerInput.AttackPressed -= Attack;
+        if (_comboIndex != 0)
         {
-            _inputAction.Player.Attack.performed -= Attack;
+            foreach (int attackHash in _attackStateHashes)
+                _anim.ResetTrigger(attackHash);
+
+            EndAttack(_comboIndex);
         }
     }
 
@@ -71,7 +83,7 @@ public class PlayerAttack : MonoBehaviour
         }
     }
 
-    private void Attack(InputAction.CallbackContext context)
+    private void Attack()
     {
         // Chưa đánh: bắt đầu combo
         if (_comboIndex == 0)
@@ -81,7 +93,8 @@ public class PlayerAttack : MonoBehaviour
             _canCombo = false;
 
             _anim.SetBool("IsCombat", true);
-            _anim.SetTrigger("Attack1");
+            _anim.SetTrigger(_attackStateHashes[0]);
+            AttackStarted?.Invoke(_comboIndex);
             return;
         }
 
@@ -109,7 +122,8 @@ public class PlayerAttack : MonoBehaviour
         _queuedAttack = false;
         _canCombo = false;
 
-        _anim.SetTrigger("Attack" + _comboIndex);
+        _anim.SetTrigger(_attackStateHashes[_comboIndex - 1]);
+        AttackStarted?.Invoke(_comboIndex);
     }
 
     public void EndAttack(int attackIndex)
@@ -122,21 +136,27 @@ public class PlayerAttack : MonoBehaviour
         _canCombo = false;
 
         _anim.SetBool("IsCombat", false);
+        AttackEnded?.Invoke(attackIndex);
     }
 
     public void DealDamage()
     {
-        Debug.Log("Deal damage");
+        if (!isActiveAndEnabled || !_playerInput.isActiveAndEnabled || _attackPoint == null)
+            return;
+
         var hits = Physics.OverlapSphere(_attackPoint.position, _attackRadius, _enemyLayer);
 
         var damagedTargets = new HashSet<IDamageable>();
 
         foreach (var hit in hits)
         {
-             IDamageable target = hit.GetComponentInParent<IDamageable>();
+            IDamageable target = hit.GetComponentInParent<IDamageable>();
 
             if (target != null && damagedTargets.Add(target))
+            {
                 target.TakeDamage(_attackDamage);
+                TargetHit?.Invoke(target);
+            }
         }
     }
 }

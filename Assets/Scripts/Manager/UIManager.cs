@@ -1,4 +1,3 @@
-using TMPro;
 using UnityEngine;
 
 public class UIManager : MonoBehaviour
@@ -6,20 +5,16 @@ public class UIManager : MonoBehaviour
     public GameObject StartPanel;
     public GameObject GameOverPanel;
     public GameObject GameWinPanel;
-    public GameObject HealthPanel;
-
-    public TMP_Text CoinText;
+    public HealthPanel HealthPanel;
 
     private GameManager _gameManager;
 
-    private void OnEnable()
+    private void Start()
     {
         _gameManager = GameManager.Instance;
         _gameManager.OnGameStart += HandleGameStart;
         _gameManager.OnGameOver += HandleGameOver;
         _gameManager.OnGameRestart += HandleGameRestart;
-        _gameManager.OnGetCoin += OnGetCoin;
-        _gameManager.OnHealthChanged += UpdateHealth;
     }
 
     private void OnDisable()
@@ -32,42 +27,18 @@ public class UIManager : MonoBehaviour
         _gameManager.OnGameStart -= HandleGameStart;
         _gameManager.OnGameOver -= HandleGameOver;
         _gameManager.OnGameRestart -= HandleGameRestart;
-        _gameManager.OnGetCoin -= OnGetCoin;
-        _gameManager.OnHealthChanged -= UpdateHealth;
         _gameManager = null;
     }
 
-    private void HandleGameStart(int maxHealth)
+    private void HandleGameStart()
     {
-        // StartPanel.SetActive(false);
-        // GameOverPanel.SetActive(false);
-        // GameWinPanel.SetActive(false);
-        HealthPanel.SetActive(true);
-        HealthPanel.GetComponent<HealthPanel>().Initialize(maxHealth);
     }
 
     private void HandleGameOver()
     {
-        // StartPanel.SetActive(false);
-        // GameOverPanel.SetActive(true);
-        // GameWinPanel.SetActive(false);
     }
 
     private void HandleGameRestart()
     {
-        // StartPanel.SetActive(true);
-        // GameOverPanel.SetActive(false);
-        // GameWinPanel.SetActive(false);
-        HealthPanel.SetActive(false);
-    }
-
-    private void OnGetCoin(int totalCoins)
-    {
-        CoinText.text = "Coins: " + totalCoins.ToString();
-    }
-
-    private void UpdateHealth(float currentHealth)
-    {
-        HealthPanel.GetComponent<HealthPanel>().UpdateHealth(currentHealth);
     }
 }

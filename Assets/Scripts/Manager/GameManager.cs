@@ -3,90 +3,80 @@ using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
+    private GameLoader _loader;
+    private static GameManager _instance;
 
-    public int MaxHealth = 3;
+    public static GameManager Instance => _instance;
+    public PlayerController CurrentPlayer { get; private set; }
+    public UIManager UIManager;
+    public CameraControl playerCamera;
 
-    public static GameManager Instance
-    {
-        get
-        {
-            if (_instance == null)
-            {
-                _instance = FindObjectOfType<GameManager>();
-                if (_instance == null)
-                {
-                    GameObject go = new GameObject("GameManager");
-                    _instance = go.AddComponent<GameManager>();
-                }
-            }
-            return _instance;
-        }
-    }
-
-    public event Action<int> OnGameStart;
+    public event Action OnGameStart;
     public event Action OnGameOver;
     public event Action OnGameRestart;
-    public event Action<float> OnHealthChanged;
+    public event Action<PlayerController> OnPlayerChanged;
+    public event Action<float> OnLoadingProgressChanged;
 
-    public event Action<int> OnGetCoin;
-
-    private static GameManager _instance;
-    private int _totalCoints;
-    public float CurrentHealth { get; private set; }
-
-
-    void Awake()
+    private void Awake()
     {
-        if (_instance == null)
-        {
-            _instance = this;
-        }
-        else
+        if (_instance != null && _instance != this)
         {
             Destroy(gameObject);
+            return;
         }
+        _instance = this;
+        _loader = GameLoader.Instance;
+        _loader.OnLoadingProgressChanged += HandleLoadingProgress;
+        _loader.RetryRequested += RestartGame;
     }
 
     private void OnDestroy()
     {
-        if (_instance == this)
-        {
-            _instance = null;
-        }
+        if (Instance != this)
+            return;
+
+        _loader.OnLoadingProgressChanged -= HandleLoadingProgress;
+        _loader.RetryRequested -= RestartGame;
     }
 
-    void Start()
+    private void Start()
     {
         StartGame();
     }
 
     public void StartGame()
     {
-        CurrentHealth = MaxHealth;
-        OnGameStart?.Invoke(MaxHealth);
-        OnHealthChanged?.Invoke(CurrentHealth);
+        CurrentPlayer = _loader.LoadPlayer();
+        StartSession(CurrentPlayer);
     }
 
-    public void TakeDamage(float damage)
+    public void RestartGame()
     {
-        if (damage <= 0 || CurrentHealth <= 0)
-            return;
-
-        CurrentHealth = Mathf.Max(0, CurrentHealth - damage);
-        OnHealthChanged?.Invoke(CurrentHealth);
-
-        if (CurrentHealth == 0)
-            GameOver();
     }
 
-    public void GetCoin()
+    private void HandleLoadingProgress(float progress)
     {
-        _totalCoints++;
-        OnGetCoin?.Invoke(_totalCoints);
+        OnLoadingProgressChanged?.Invoke(progress);
+    }
+
+    private void StartSession(PlayerController player)
+    {
+        var playerHealth = CurrentPlayer.GetComponent<PlayerHealth>();
+        UIManager.HealthPanel.Initialize(playerHealth);
+        playerHealth.Initialize();
+
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
+        OnPlayerChanged(CurrentPlayer);
     }
 
     public void GameOver()
     {
-        OnGameOver?.Invoke();
+        
+    }
+
+    private void HandlePlayerDied()
+    {
+        GameOver();
     }
 }

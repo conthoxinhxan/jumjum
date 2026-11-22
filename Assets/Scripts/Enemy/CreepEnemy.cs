@@ -44,7 +44,7 @@ public class CreepEnemy : EnemyBase, IDamageable
     {
         Vector3 offset = Target.position - transform.position;
         offset.y = 0f;
-        return offset.sqrMagnitude <= AttackRange;
+        return offset.sqrMagnitude <= AttackRange * AttackRange;
     }
 
     public void Fire()
@@ -59,7 +59,6 @@ public class CreepEnemy : EnemyBase, IDamageable
 
         IDamageable target = Target.GetComponent<IDamageable>();
         target.TakeDamage(MeleeDamage);
-        Debug.LogWarning($"Target '{Target.name}' has no IDamageable component.", Target);
     }
 
     public void TakeDamage(float damage)
