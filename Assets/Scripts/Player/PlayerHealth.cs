@@ -18,6 +18,23 @@ public class PlayerHealth : MonoBehaviour, IDamageable
         HealthChanged?.Invoke(CurrentHealth);
     }
 
+    public bool TryHeal(float amount)
+    {
+        if (IsDead || CurrentHealth >= MaxHealth || !(amount > 0f))
+        {
+            return false;
+        }
+        float healedHealth = Mathf.Min(MaxHealth, CurrentHealth + amount);
+        if (healedHealth <= CurrentHealth)
+        {
+            return false;
+        }
+
+        CurrentHealth = healedHealth;
+        HealthChanged?.Invoke(CurrentHealth);
+        return true;
+    }
+
     public void TakeDamage(float damage)
     {
         if (IsDead || !(damage > 0f))
@@ -26,10 +43,9 @@ public class PlayerHealth : MonoBehaviour, IDamageable
         CurrentHealth = Mathf.Max(0f, CurrentHealth - damage);
         HealthChanged?.Invoke(CurrentHealth);
 
-        if (IsDead) 
+        if (IsDead)
         {
             Died?.Invoke();
         }
-            
     }
 }

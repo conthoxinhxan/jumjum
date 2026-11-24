@@ -2083,6 +2083,7 @@ GameObject:
   - component: {fileID: 1283153586142917336}
   - component: {fileID: 7739483234068117737}
   - component: {fileID: -6431568924655972175}
+  - component: {fileID: 4139231042244541960}
   m_Layer: 7
   m_Name: Player
   m_TagString: Player
@@ -2257,6 +2258,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3db76de3155e0b34f9ebc753db105de5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerController
+--- !u!114 &4139231042244541960
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6416113248119360236}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2c00f83911d85d9428976cae0cf6bff4, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerItemUse
+  _startingHealingItems: 3
+  _healthPerItem: 20
 --- !u!1 &6882226429960823992
 GameObject:
   m_ObjectHideFlags: 0

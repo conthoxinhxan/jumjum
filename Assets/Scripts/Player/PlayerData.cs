@@ -8,6 +8,13 @@ public class PlayerData
     public float CurrentHealth;
     public float MaxHeath;
     public Position Position;
+    public PlayerInventoryData Inventory;
+}
+
+[Serializable]
+public class PlayerInventoryData
+{
+    public int HealingItems;
 }
 
 [Serializable]

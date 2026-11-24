@@ -81,7 +81,7 @@ public class GameManager : MonoBehaviour
 
         CurrentPlayer.Initialize(playerData);
         UIManager.HealthPanel.Initialize(player.Health);
-        // playerHealth.Initialize();
+        UIManager.ItemUsePanel?.Initialize(player.ItemUse);
 
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
@@ -105,6 +105,7 @@ public class GameManager : MonoBehaviour
         data.DateTime = DateTime.Now.ToString();
         data.CurrentHealth = CurrentPlayer.Health.CurrentHealth;
         data.MaxHeath = CurrentPlayer.Health.MaxHealth;
+        data.Inventory = new PlayerInventoryData { HealingItems = CurrentPlayer.ItemUse.HealingItemCount };
         
         Position pos = new Position();
         pos.X = CurrentPlayer.transform.position.x;

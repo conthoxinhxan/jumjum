@@ -6,6 +6,7 @@ public class UIManager : MonoBehaviour
     public GameObject GameOverPanel;
     public GameObject GameWinPanel;
     public HealthPanel HealthPanel;
+    public PlayerItemUsePanel ItemUsePanel;
 
     private GameManager _gameManager;
 

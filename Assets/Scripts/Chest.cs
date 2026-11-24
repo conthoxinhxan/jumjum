@@ -1,10 +1,10 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 
-public class Chest : MonoBehaviour 
+public class Chest : MonoBehaviour
 {
-    private bool _isPlayerNearby = false;
-    private bool _isOpened = false;
-
+    private PlayerController _nearbyPlayer;
+    private bool _isOpened;
     private Animator _chestAnimator;
     private WorldSpaceUI _chestUI;
 
@@ -14,44 +14,31 @@ public class Chest : MonoBehaviour
         _chestUI = GetComponentInChildren<WorldSpaceUI>();
     }
 
-    void Update()
+    private void Update()
     {
-        // Nếu người chơi đang ở gần VÀ bấm phím E VÀ rương chưa mở
-        if (_isPlayerNearby && Input.GetKeyDown(KeyCode.E) && !_isOpened)
-        {
+        if (!_isOpened && _nearbyPlayer != null && Keyboard.current?.fKey.wasPressedThisFrame == true)
             OpenChest();
-        }
     }
 
-    // Hàm xử lý khi mở rương
-    void OpenChest()
+    private void OpenChest()
     {
         _isOpened = true;
+        _nearbyPlayer.ItemUse.AddHealingItem();
+        _chestUI?.Hide();
 
-        // Nếu có hiệu ứng, kích hoạt Trigger trong Animator
         if (_chestAnimator != null)
-        {
-            _chestAnimator.SetTrigger("Open"); 
-        }
-
-        // TODO: Hiện UI thông báo hoặc cộng tiền/vật phẩm cho người chơi tại đây
+            _chestAnimator.SetTrigger("Open");
     }
 
     private void OnCollisionEnter(Collision other)
     {
-        if (other.transform.CompareTag("Player"))
-        {
-            _isPlayerNearby = true;
-            Debug.Log("Bấm E để mở rương");
-            //TODO: bật UI hiển thị chữ "Bấm E để mở" lên màn hình
-        }
+        if (other.transform.TryGetComponent(out PlayerController player))
+            _nearbyPlayer = player;
     }
 
     private void OnCollisionExit(Collision other)
     {
-        if (other.transform.CompareTag("Player"))
-        {
-            _isPlayerNearby = false;
-        }
+        if (_nearbyPlayer != null && other.transform == _nearbyPlayer.transform)
+            _nearbyPlayer = null;
     }
 }
