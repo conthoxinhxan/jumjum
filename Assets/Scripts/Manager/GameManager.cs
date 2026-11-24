@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using UnityEngine;
 
 public class GameManager : MonoBehaviour
@@ -61,9 +62,26 @@ public class GameManager : MonoBehaviour
 
     private void StartSession(PlayerController player)
     {
-        var playerHealth = CurrentPlayer.GetComponent<PlayerHealth>();
-        UIManager.HealthPanel.Initialize(playerHealth);
-        playerHealth.Initialize();
+        var playerData = LoadGame();
+
+        if (playerData == null)
+        {
+            // its means create new game
+            // for now just create a start level first
+            playerData = new PlayerData();
+            playerData.CurrentHealth = 20;
+            playerData.MaxHeath = 50;
+            playerData.DateTime = DateTime.Now.ToString();
+            
+            playerData.Position = new Position();
+            playerData.Position.X = 0;
+            playerData.Position.Y = 0;
+            playerData.Position.Z = 0;
+        }
+
+        CurrentPlayer.Initialize(playerData);
+        UIManager.HealthPanel.Initialize(player.Health);
+        // playerHealth.Initialize();
 
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
@@ -78,5 +96,39 @@ public class GameManager : MonoBehaviour
     private void HandlePlayerDied()
     {
         GameOver();
+    }
+
+    public void SaveGame()
+    {
+        PlayerData data = new PlayerData();
+        data.Name = "Player";
+        data.DateTime = DateTime.Now.ToString();
+        data.CurrentHealth = CurrentPlayer.Health.CurrentHealth;
+        data.MaxHeath = CurrentPlayer.Health.MaxHealth;
+        
+        Position pos = new Position();
+        pos.X = CurrentPlayer.transform.position.x;
+        pos.Y = CurrentPlayer.transform.position.y;
+        pos.Z = CurrentPlayer.transform.position.z;
+
+        data.Position = pos;
+
+        string savePath = Path.Combine(Application.persistentDataPath, "save.json");
+        string json = JsonUtility.ToJson(data, true);
+        File.WriteAllText(savePath, json);
+
+    }
+
+    public PlayerData LoadGame()
+    {
+        string savePath = Path.Combine(Application.persistentDataPath, "save.json");
+        if (!File.Exists(savePath))
+        {
+            return null;
+        }
+
+        string json = File.ReadAllText(savePath);
+        var playerData = JsonUtility.FromJson<PlayerData>(json);
+        return playerData;
     }
 }

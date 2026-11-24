@@ -13,8 +13,11 @@ public class PlayerController : MonoBehaviour
         Movement = GetComponent<PlayerMovement>();
         Attack = GetComponent<PlayerAttack>();
         Health = GetComponent<PlayerHealth>();
-        if (Health == null)
-            Health = gameObject.AddComponent<PlayerHealth>();
+    }
+
+    public void Initialize(PlayerData playerData)
+    {
+        Health.Initialize(playerData.CurrentHealth, playerData.MaxHeath);
     }
 
     public void SetGameplayEnabled(bool isEnabled)

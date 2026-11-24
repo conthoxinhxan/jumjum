@@ -41,7 +41,10 @@ public class GameLoader : MonoBehaviour
     private void OnDestroy()
     {
         if (Instance == this)
+        {
             Instance = null;
+        }
+            
     }
 
     // internal void BeginLoading(string scenePath, Action onStarted, Action<PlayerController> onCompleted)
@@ -58,18 +61,18 @@ public class GameLoader : MonoBehaviour
     // }
 
 
-    private void SetLoadingProgress(float progress)
-    {
-        LoadingProgress = Mathf.Clamp01(progress);
-        OnLoadingProgressChanged?.Invoke(LoadingProgress);
-    }
+    // private void SetLoadingProgress(float progress)
+    // {
+    //     LoadingProgress = Mathf.Clamp01(progress);
+    //     OnLoadingProgressChanged?.Invoke(LoadingProgress);
+    // }
 
-    private void FailLoading(string error)
-    {
-        LoadingError = error;
-        IsLoading = false;
-        Debug.LogError(error, this);
-    }
+    // private void FailLoading(string error)
+    // {
+    //     LoadingError = error;
+    //     IsLoading = false;
+    //     Debug.LogError(error, this);
+    // }
 
     public PlayerController LoadPlayer()
     {

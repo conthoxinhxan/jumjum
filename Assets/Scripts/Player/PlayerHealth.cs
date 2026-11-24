@@ -4,17 +4,18 @@ using UnityEngine;
 [DisallowMultipleComponent]
 public class PlayerHealth : MonoBehaviour, IDamageable
 {
-    public float MaxHealth { get; private set; } = 100;
+    public float MaxHealth { get; private set; }
     public float CurrentHealth { get; private set; }
     public bool IsDead => CurrentHealth <= 0f;
 
     public event Action<float> HealthChanged;
     public event Action Died;
 
-    public void Initialize()
+    public void Initialize(float currentHealth, float maxHealth)
     {
-        CurrentHealth = MaxHealth;
-        HealthChanged.Invoke(CurrentHealth);
+        MaxHealth = maxHealth;
+        CurrentHealth = currentHealth;
+        HealthChanged?.Invoke(CurrentHealth);
     }
 
     public void TakeDamage(float damage)
