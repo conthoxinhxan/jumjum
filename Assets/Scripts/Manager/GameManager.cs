@@ -72,6 +72,7 @@ public class GameManager : MonoBehaviour
             playerData.CurrentHealth = 20;
             playerData.MaxHeath = 50;
             playerData.DateTime = DateTime.Now.ToString();
+            playerData.Inventory = new PlayerInventoryData();
             
             playerData.Position = new Position();
             playerData.Position.X = 0;
@@ -81,7 +82,7 @@ public class GameManager : MonoBehaviour
 
         CurrentPlayer.Initialize(playerData);
         UIManager.HealthPanel.Initialize(player.Health);
-        UIManager.ItemUsePanel?.Initialize(player.ItemUse);
+        UIManager.UseItemPanel?.Initialize(player.ItemUse);
 
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
@@ -105,7 +106,10 @@ public class GameManager : MonoBehaviour
         data.DateTime = DateTime.Now.ToString();
         data.CurrentHealth = CurrentPlayer.Health.CurrentHealth;
         data.MaxHeath = CurrentPlayer.Health.MaxHealth;
-        data.Inventory = new PlayerInventoryData { HealingItems = CurrentPlayer.ItemUse.HealingItemCount };
+        data.Inventory = new PlayerInventoryData 
+        { 
+            Items = CurrentPlayer.ItemUse.Inventory
+        };
         
         Position pos = new Position();
         pos.X = CurrentPlayer.transform.position.x;

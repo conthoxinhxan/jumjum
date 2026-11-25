@@ -21,6 +21,14 @@ public class PlayerController : MonoBehaviour
     {
         Health.Initialize(playerData.CurrentHealth, playerData.MaxHeath);
         ItemUse.Initialize(playerData.Inventory);
+
+        if (playerData.Position != null)
+        {
+            transform.position = new Vector3(
+                playerData.Position.X,
+                playerData.Position.Y,
+                playerData.Position.Z);
+        }
     }
 
     public void SetGameplayEnabled(bool isEnabled)

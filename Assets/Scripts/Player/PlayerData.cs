@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 [Serializable]
 public class PlayerData
@@ -14,7 +15,7 @@ public class PlayerData
 [Serializable]
 public class PlayerInventoryData
 {
-    public int HealingItems;
+    public List<ItemBase> Items;
 }
 
 [Serializable]

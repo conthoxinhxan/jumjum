@@ -1,16 +1,16 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class PlayerItemUse : MonoBehaviour
 {
-    [SerializeField, Min(0)] private int _startingHealingItems = 3;
-    [SerializeField, Min(1f)] private float _healthPerItem = 20f;
-
     private PlayerInput _input;
     private PlayerHealth _health;
-
-    public int HealingItemCount { get; private set; }
     public event Action<int> HealingItemCountChanged;
+    public event Action InventoryChanged;
+
+    public List<UseableItem> UseableItems { get ; private set; } = new();
+    public List<ItemBase> Inventory { get ; private set; } = new();
 
     private void Awake()
     {
@@ -24,38 +24,173 @@ public class PlayerItemUse : MonoBehaviour
         {
             _input.InteractPressed += UseHealingItem;
         }
-            
     }
 
-    private void OnDisable() => _input.InteractPressed -= UseHealingItem;
+    private void OnDisable()
+    {
+        if (_input != null)
+        {
+            _input.InteractPressed -= UseHealingItem;
+        }
+    }
 
     public void Initialize(PlayerInventoryData inventory)
     {
-        HealingItemCount = Mathf.Max(0, inventory?.HealingItems ?? _startingHealingItems);
-        HealingItemCountChanged?.Invoke(HealingItemCount);
+        Inventory.Clear();
+        UseableItems.Clear();
+
+        if (inventory?.Items == null || inventory.Items.Count == 0)
+        {
+            AddHealingItem(3);
+            return;
+        }
+
+        foreach (var savedItem in inventory.Items)
+        {
+            if (savedItem == null || savedItem.Quantity <= 0)
+            {
+                continue;
+            }
+
+            if (string.Equals(savedItem.Name, "Health Potion", StringComparison.OrdinalIgnoreCase))
+            {
+                AddHealingItem(savedItem.Quantity);
+            }
+            else
+            {
+                AddItem(new ItemBase
+                {
+                    Name = savedItem.Name,
+                    Quantity = savedItem.Quantity,
+                    Description = savedItem.Description
+                });
+            }
+        }
+
+        InventoryChanged?.Invoke();
     }
 
-    public void AddHealingItem()
+    public void AddItem(ItemBase newItem)
     {
-        HealingItemCount++;
-        HealingItemCountChanged?.Invoke(HealingItemCount);
+        if (newItem == null || newItem.Quantity <= 0)
+        {
+            return;
+        }
+
+        foreach (var item in Inventory)
+        {
+            if (string.Equals(item.Name, newItem.Name, StringComparison.OrdinalIgnoreCase))
+            {
+                item.Quantity += newItem.Quantity;
+                UpdateUseableItemQuantity(newItem.Name, item.Quantity);
+                InventoryChanged?.Invoke();
+                return;
+            }
+        }
+
+        Inventory.Add(newItem);
+
+        if (newItem is UseableItem useableItem)
+        {
+            UseableItems.Add(useableItem);
+            SetCurrentUseable(useableItem);
+        }
+
+        InventoryChanged?.Invoke();
+    }
+
+    public void AddHealingItem(int quantity = 1)
+    {
+        if (quantity <= 0)
+        {
+            return;
+        }
+
+        var healItem = new HealItem(_health, quantity);
+        foreach (var item in Inventory)
+        {
+            if (string.Equals(item.Name, healItem.Name, StringComparison.OrdinalIgnoreCase))
+            {
+                item.Quantity += quantity;
+                UpdateUseableItemQuantity(healItem.Name, item.Quantity);
+                InventoryChanged?.Invoke();
+                return;
+            }
+        }
+
+        Inventory.Add(new ItemBase
+        {
+            Name = healItem.Name,
+            Quantity = quantity,
+            Description = healItem.Description
+        });
+
+        UseableItems.Add(healItem);
+        SetCurrentUseable(healItem);
+        InventoryChanged?.Invoke();
+        HealingItemCountChanged?.Invoke(quantity);
+    }
+
+    private void UpdateUseableItemQuantity(string itemName, int quantity)
+    {
+        foreach (var useableItem in UseableItems)
+        {
+            if (string.Equals(useableItem.Name, itemName, StringComparison.OrdinalIgnoreCase))
+            {
+                useableItem.Quantity = quantity;
+                return;
+            }
+        }
+
+        if (string.Equals(itemName, "Health Potion", StringComparison.OrdinalIgnoreCase))
+        {
+            var healItem = new HealItem(_health, quantity);
+            UseableItems.Add(healItem);
+            SetCurrentUseable(healItem);
+        }
     }
 
     private void UseHealingItem()
     {
-        Debug.Log("Using healing item");
-        if (HealingItemCount <= 0)
+        var currentItem = UseableItems.Find(item => item.IsCurrentUse);
+        if (currentItem == null && UseableItems.Count > 0)
+        {
+            currentItem = UseableItems[0];
+        }
+
+        if (currentItem == null || currentItem.Quantity <= 0)
         {
             return;
         }
 
-        HealingItemCount--;
-        if (!_health.TryHeal(_healthPerItem))
+        currentItem.Use();
+        currentItem.Quantity--;
+
+        foreach (var item in Inventory)
         {
-            HealingItemCount++;
-            return;
+            if (string.Equals(item.Name, currentItem.Name, StringComparison.OrdinalIgnoreCase))
+            {
+                item.Quantity = currentItem.Quantity;
+                break;
+            }
         }
 
-        HealingItemCountChanged?.Invoke(HealingItemCount);
+        if (currentItem.Quantity <= 0)
+        {
+            UseableItems.Remove(currentItem);
+            Inventory.RemoveAll(item =>
+                string.Equals(item.Name, currentItem.Name, StringComparison.OrdinalIgnoreCase));
+        }
+
+        HealingItemCountChanged?.Invoke(currentItem.Quantity);
+        InventoryChanged?.Invoke();
+    }
+
+    private void SetCurrentUseable(UseableItem selectedItem)
+    {
+        foreach (var item in UseableItems)
+        {
+            item.IsCurrentUse = item == selectedItem;
+        }
     }
 }
