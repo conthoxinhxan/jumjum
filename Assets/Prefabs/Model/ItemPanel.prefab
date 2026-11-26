@@ -227,5 +227,5 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ItemPanel
   Icon: {fileID: 3445090160617592599}
-  QuantityText: {fileID: 0}
+  QuantityText: {fileID: 1047470246499906620}
   ItemType: 0

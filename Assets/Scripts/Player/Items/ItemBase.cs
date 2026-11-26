@@ -11,6 +11,9 @@ public class ItemBase
     public string Name;
     public int Quantity;
     public string Description;
+    public string AddressableKeyUI;
+    public string AddressableKeyGameObject;
+    public string Type;
 }
 
 [Serializable]

@@ -1,12 +1,12 @@
 using System;
 using System.Threading.Tasks;
-using Unity.Multiplayer.PlayMode;
 using UnityEngine;
+using UnityEngine.AddressableAssets;
+using UnityEngine.ResourceManagement.AsyncOperations;
 
 public class GameLoader : MonoBehaviour
 {
-    private const string PlayerAddress = "Assets/Prefabs/Player.prefab";
-    private readonly AddressableLoader _addressableLoader = new AddressableLoader();
+    private const string PlayerAddress = "Player";
     private GameObject _playerInstance;
 
     public static GameLoader Instance { get; private set; }
@@ -73,18 +73,39 @@ public class GameLoader : MonoBehaviour
     //     Debug.LogError(error, this);
     // }
 
-    public async Task<PlayerController> LoadPlayerAsync()
+    public async Task<PlayerController> LoadPlayerAsync(PlayerData playerData)
     {
-        _playerInstance = await _addressableLoader.InstantiateAsync(PlayerAddress);
-        var player = _playerInstance.GetComponent<PlayerController>();
 
-        if (player == null)
+        // _playerInstance = await _addressableLoader.InstantiateAsync(PlayerAddress);
+        // var player = _playerInstance.GetComponent<PlayerController>();
+
+        // if (player == null)
+        // {
+        //     _addressableLoader.ReleaseInstance(_playerInstance);
+        //     _playerInstance = null;
+        //     throw new InvalidOperationException($"Addressable player '{PlayerAddress}' has no PlayerController component.");
+        // }
+
+        if (playerData == null)
         {
-            _addressableLoader.ReleaseInstance(_playerInstance);
-            _playerInstance = null;
-            throw new InvalidOperationException($"Addressable player '{PlayerAddress}' has no PlayerController component.");
+            throw new ArgumentNullException(nameof(playerData));
         }
 
+        var handle = Addressables.InstantiateAsync(PlayerAddress);
+
+        await handle.Task;
+
+        if (handle.Status != AsyncOperationStatus.Succeeded)
+        {
+            var exception = handle.OperationException;
+            Addressables.Release(handle);
+            throw new InvalidOperationException($"Failed to load player prefab '{PlayerAddress}'.", exception);
+        }
+
+        _playerInstance = handle.Result;
+        var player = _playerInstance.GetComponent<PlayerController>();
+
+        player.Initialize(playerData);
         return player;
     }
 }

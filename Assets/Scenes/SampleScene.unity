@@ -3446,7 +3446,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::WorldSpaceUI
   _camera: {fileID: 0}
   _player: {fileID: 0}
-  _showDistance: 3
+  _showDistance: 11.68
   _panel: {fileID: 0}
 --- !u!1 &1110434701
 GameObject:

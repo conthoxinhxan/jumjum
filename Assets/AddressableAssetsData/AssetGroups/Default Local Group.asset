@@ -16,7 +16,12 @@ MonoBehaviour:
   m_GUID: cbab520d86583d64faa8cfabdbbefdd9
   m_SerializeEntries:
   - m_GUID: 3af58189ca489d841a9dcf06367cf903
-    m_Address: Assets/Prefabs/Player.prefab
+    m_Address: Player
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b4e8cd00441f3cf458811c06a1069e7d
+    m_Address: HealPotionPanel
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

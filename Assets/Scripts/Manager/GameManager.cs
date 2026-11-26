@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 
@@ -49,7 +50,9 @@ public class GameManager : MonoBehaviour
     {
         try
         {
-            CurrentPlayer = await _loader.LoadPlayerAsync();
+            // var playerData = LoadGame() ?? CreateNewPlayerData();
+            var playerData = CreateNewPlayerData();
+            CurrentPlayer = await _loader.LoadPlayerAsync(playerData);
             StartSession(CurrentPlayer);
         }
         catch (Exception exception)
@@ -69,31 +72,37 @@ public class GameManager : MonoBehaviour
 
     private void StartSession(PlayerController player)
     {
-        var playerData = LoadGame();
-
-        if (playerData == null)
-        {
-            // its means create new game
-            // for now just create a start level first
-            playerData = new PlayerData();
-            playerData.CurrentHealth = 20;
-            playerData.MaxHeath = 50;
-            playerData.DateTime = DateTime.Now.ToString();
-            playerData.Inventory = new PlayerInventoryData();
-            
-            playerData.Position = new Position();
-            playerData.Position.X = 0;
-            playerData.Position.Y = 0;
-            playerData.Position.Z = 0;
-        }
-
-        CurrentPlayer.Initialize(playerData);
         UIManager.HealthPanel.Initialize(player.Health);
         UIManager.UseItemPanel?.Initialize(player.ItemUse);
 
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
         OnPlayerChanged(CurrentPlayer);
+    }
+
+    private static PlayerData CreateNewPlayerData()
+    {
+        return new PlayerData
+        {
+            Name = "Player",
+            DateTime = DateTime.Now.ToString(),
+            CurrentHealth = 20,
+            MaxHeath = 50,
+            Position = new Position(),
+            Inventory = new PlayerInventoryData
+            {
+                Items = new List<ItemBase>
+                {
+                    new ItemBase 
+                    { 
+                        Name = "Health Potion", 
+                        Quantity = 3 , 
+                        AddressableKeyUI = "HealPotionPanel",
+                        Type = "Heal"
+                    }
+                }
+            }
+        };
     }
 
     public void GameOver()

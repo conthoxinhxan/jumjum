@@ -5,9 +5,9 @@ using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
 
-public class AddressableLoader
+public static class AddressableLoader
 {
-	public async Task<AsyncOperationHandle<T>> LoadAssetAsync<T>(object key) where T : UnityEngine.Object
+	public static async Task<AsyncOperationHandle<T>> LoadAssetAsync<T>(object key) where T : UnityEngine.Object
 	{
 		var handle = Addressables.LoadAssetAsync<T>(key);
 		await handle.Task;
@@ -22,7 +22,7 @@ public class AddressableLoader
 		return handle;
 	}
 
-	public async Task<GameObject> InstantiateAsync(object key, Transform parent = null)
+	public static async Task<GameObject> InstantiateAsync(object key, Transform parent = null)
 	{
 		var handle = Addressables.InstantiateAsync(key, parent);
 		await handle.Task;
@@ -37,13 +37,13 @@ public class AddressableLoader
 		return handle.Result;
 	}
 
-	public void ReleaseAsset<T>(AsyncOperationHandle<T> handle) where T : UnityEngine.Object
+	public static void ReleaseAsset<T>(AsyncOperationHandle<T> handle) where T : UnityEngine.Object
 	{
 		if (handle.IsValid())
 			Addressables.Release(handle);
 	}
 
-	public bool ReleaseInstance(GameObject instance)
+	public static bool ReleaseInstance(GameObject instance)
 	{
 		return instance != null && Addressables.ReleaseInstance(instance);
 	}

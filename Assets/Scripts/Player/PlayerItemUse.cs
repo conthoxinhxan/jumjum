@@ -47,7 +47,7 @@ public class PlayerItemUse : MonoBehaviour
 
         foreach (var savedItem in inventory.Items)
         {
-            if (savedItem == null || savedItem.Quantity <= 0)
+            if (savedItem == null || savedItem.Quantity < 0)
             {
                 continue;
             }
@@ -101,7 +101,7 @@ public class PlayerItemUse : MonoBehaviour
 
     public void AddHealingItem(int quantity = 1)
     {
-        if (quantity <= 0)
+        if (quantity < 0)
         {
             return;
         }
@@ -173,13 +173,6 @@ public class PlayerItemUse : MonoBehaviour
                 item.Quantity = currentItem.Quantity;
                 break;
             }
-        }
-
-        if (currentItem.Quantity <= 0)
-        {
-            UseableItems.Remove(currentItem);
-            Inventory.RemoveAll(item =>
-                string.Equals(item.Name, currentItem.Name, StringComparison.OrdinalIgnoreCase));
         }
 
         HealingItemCountChanged?.Invoke(currentItem.Quantity);

@@ -1,18 +1,20 @@
+using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
 
 public class UseItemPanel : MonoBehaviour
 {
-    public ItemPanel Prefab;
     public Transform Container;
 
-    private List<ItemPanel> _items = new();
-    private List<UseableItem> _sourceItems = new();
+    private List<ItemPanel> _useItemPanels = new();
+    private List<UseableItem> _useItems = new();
     private PlayerItemUse _playerItemUse;
+    private bool _isRefreshing;
 
-    public void Initialize(List<UseableItem> items)
+    public void Initialize(List<UseableItem> useItems)
     {
-        _sourceItems = items ?? new List<UseableItem>();
+        _useItems = useItems ?? new List<UseableItem>();
 
         Refresh();
     }
@@ -44,53 +46,70 @@ public class UseItemPanel : MonoBehaviour
         {
             _playerItemUse.InventoryChanged -= Refresh;
         }
+
+        foreach (var item in _useItemPanels)
+        {
+            if (item != null)
+            {
+                AddressableLoader.ReleaseInstance(item.gameObject);
+            }
+        }
     }
 
-    private void Refresh()
+    private async void Refresh()
     {
-        if (_sourceItems.Count == 0)
+        if (_isRefreshing)
         {
-            foreach (var item in _items)
-            {
-                if (item != null)
-                {
-                    item.gameObject.SetActive(false);
-                }
-            }
             return;
         }
 
-        var firstItem = _sourceItems[0];
-
-        Transform container = Container != null ? Container : transform;
-        while (_items.Count < _sourceItems.Count)
+        _isRefreshing = true;
+        try
         {
-            ItemPanel panel;
-            if (Prefab != null)
+            while (_useItemPanels.Count < _useItems.Count)
             {
-                panel = Instantiate(Prefab, container);
+                var panel = await GetUIPrefab(_useItems[_useItemPanels.Count], Container);
+                _useItemPanels.Add(panel);
             }
-            else
+
+            for (int i = 0; i < _useItemPanels.Count; i++)
             {
-                panel = container.GetComponentInChildren<ItemPanel>(true);
-                if (panel == null)
+                if (i < _useItems.Count)
                 {
-                    break;
+                    _useItemPanels[i].Initialize(_useItems[i]);
                 }
             }
-            _items.Add(panel);
+        }
+        catch (Exception exception)
+        {
+            Debug.LogException(exception, this);
+        }
+        finally
+        {
+            _isRefreshing = false;
+        }
+    }
+
+    private async Task<ItemPanel> GetUIPrefab(UseableItem item, Transform parent)
+    {
+        string address = item.AddressableKeyUI;
+        if (string.IsNullOrEmpty(address) && item.Name == "Health Potion")
+        {
+            address = "HealPotionPanel";
         }
 
-        for (int i = 0; i < _items.Count; i++)
+        if (string.IsNullOrEmpty(address))
         {
-            if (i < _sourceItems.Count)
-            {
-                _items[i].Initialize(_sourceItems[i]);
-            }
-            else
-            {
-                _items[i].gameObject.SetActive(false);
-            }
+            return null;
         }
+
+        var obj = await AddressableLoader.InstantiateAsync(address, parent);
+        var panel = obj.GetComponent<ItemPanel>();
+        if (panel == null)
+        {
+            AddressableLoader.ReleaseInstance(obj);
+        }
+
+        return panel;
     }
 }

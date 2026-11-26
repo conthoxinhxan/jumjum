@@ -15,7 +15,6 @@ public class ItemPanel : MonoBehaviour
 {
     public Image Icon;
     public TMP_Text QuantityText;
-
     public ItemType ItemType;
 
     public void Initialize(ItemBase item)
@@ -31,7 +30,7 @@ public class ItemPanel : MonoBehaviour
 
         if (QuantityText != null)
         {
-            QuantityText.text = $"x{item.Quantity}";
+            QuantityText.text = $"{item.Quantity}";
         }
     }
 
