@@ -1,14 +1,13 @@
 using System;
-using System.Collections;
 using System.Threading.Tasks;
 using Unity.Multiplayer.PlayMode;
 using UnityEngine;
-using UnityEngine.Rendering;
-using UnityEngine.SceneManagement;
 
 public class GameLoader : MonoBehaviour
 {
-    private const string PlayerResourcePath = "Player";
+    private const string PlayerAddress = "Assets/Prefabs/Player.prefab";
+    private readonly AddressableLoader _addressableLoader = new AddressableLoader();
+    private GameObject _playerInstance;
 
     public static GameLoader Instance { get; private set; }
 
@@ -74,11 +73,18 @@ public class GameLoader : MonoBehaviour
     //     Debug.LogError(error, this);
     // }
 
-    public PlayerController LoadPlayer()
+    public async Task<PlayerController> LoadPlayerAsync()
     {
-        var playerPrefab = Resources.Load<GameObject>(PlayerResourcePath);
+        _playerInstance = await _addressableLoader.InstantiateAsync(PlayerAddress);
+        var player = _playerInstance.GetComponent<PlayerController>();
 
-        var player = Instantiate(playerPrefab).GetComponent<PlayerController>();
+        if (player == null)
+        {
+            _addressableLoader.ReleaseInstance(_playerInstance);
+            _playerInstance = null;
+            throw new InvalidOperationException($"Addressable player '{PlayerAddress}' has no PlayerController component.");
+        }
+
         return player;
     }
 }

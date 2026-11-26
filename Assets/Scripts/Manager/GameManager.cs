@@ -45,10 +45,17 @@ public class GameManager : MonoBehaviour
         StartGame();
     }
 
-    public void StartGame()
+    public async void StartGame()
     {
-        CurrentPlayer = _loader.LoadPlayer();
-        StartSession(CurrentPlayer);
+        try
+        {
+            CurrentPlayer = await _loader.LoadPlayerAsync();
+            StartSession(CurrentPlayer);
+        }
+        catch (Exception exception)
+        {
+            Debug.LogException(exception, this);
+        }
     }
 
     public void RestartGame()
